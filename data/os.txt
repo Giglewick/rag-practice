@@ -1,1 +1,0 @@
-Ein Betriebssystem verwaltet die Hardware und Software eines Computers. Es organisiert Prozesse, Speicher und Dateien. Beispiele sind Windows, Linux und macOS.

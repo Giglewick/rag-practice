@@ -1,1 +1,0 @@
-Ein Compiler uebersetzt Quellcode in Maschinensprache. Dabei prueft er Syntax und kann Fehler melden.

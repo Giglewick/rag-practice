@@ -1,1 +1,0 @@
-Ein Netzwerk verbindet Computer, damit sie Daten austauschen koennen. Bekannte Protokolle sind TCP/IP.

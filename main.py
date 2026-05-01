@@ -1,50 +1,51 @@
-from pathlib import Path
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
+from document_loader import load_pdf_documents
+from rag_pipeline import (
+    create_chunks,
+    create_vectorstore,
+    create_rag_chain,
+    answer_question,
+)
 
 
-def load_documents():
-    documents = []
+def print_sources(results):
+    seen_sources = set()
 
-    for file in Path("data").glob("*.txt"):
-        text = file.read_text(encoding="utf-8")
-        documents.append({
-            "content": text,
-            "source": file.name
-        })
+    for doc in results:
+        source = doc.metadata.get("source")
+        page = doc.metadata.get("page")
 
-    return documents
+        if page is not None:
+            source_info = f"{source}, page {page + 1}"
+        else:
+            source_info = source
+
+        if source_info not in seen_sources:
+            print("-", source_info)
+            seen_sources.add(source_info)
 
 
 def main():
-    documents = load_documents()
-    print("Dokumente geladen:", len(documents))
+    documents = load_pdf_documents()
+    print("documents loaded:", len(documents))
 
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    chunks = create_chunks(documents)
+    print("chunks created:", len(chunks))
 
-    # list comprehension
-    texts = [doc["content"] for doc in documents]
-    metadatas = [{"source": doc["source"]} for doc in documents]
+    vectorstore = create_vectorstore(chunks)
+    chain = create_rag_chain()
 
-    vectorstore = Chroma.from_texts(
-        texts=texts,
-        embedding=embeddings,
-        metadatas=metadatas,
-        persist_directory="chroma_db"
-    )
+    question = input("Your question: ")
 
-    question = "Was ist ein Betriebssystem?"
-    results = vectorstore.similarity_search(question, k=2)
+    answer, results = answer_question(vectorstore, chain, question)
 
-    print("\nFrage:", question)
-    print("\nGefundene Dokumente:")
+    print("\nquestion:")
+    print(question)
 
-    for number, doc in enumerate(results, start=1):
-        print(f"\nTreffer {number}")
-        print("Quelle:", doc.metadata["source"])
-        print("Text:", doc.page_content)
+    print("\nanswer:")
+    print(answer)
+
+    print("\norigin:")
+    print_sources(results)
 
 
 if __name__ == "__main__":
