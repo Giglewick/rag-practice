@@ -1,5 +1,5 @@
-from document_loader import load_pdf_documents
-from rag_pipeline import (
+from src.document_loader import load_pdf_documents
+from src.rag_pipeline import (
     create_chunks,
     create_vectorstore,
     create_rag_chain,
